@@ -1,129 +1,24 @@
 <!doctype html>
-<html lang="ja">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#f6f7fb" />
-<title>Match Point</title>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f6f7fb"><title>Match Point</title>
 <style>
-:root{--bg:#f6f7fb;--card:#fff;--ink:#172033;--muted:#7c8494;--line:#e7e9ef;--accent:#5c6ac4;--soft:#eef0ff;--good:#2f8f6b;--warn:#b16d3a;--danger:#b95361;--shadow:0 10px 30px rgba(30,40,70,.07)}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.app{max-width:760px;margin:0 auto;padding:20px 16px 92px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.brand h1{font-size:25px;margin:0}.brand p{margin:4px 0 0;color:var(--muted);font-size:13px}.month-nav{display:flex;align-items:center;gap:8px}.month-nav button,.ghost{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 12px;font-weight:700;color:var(--ink)}#monthLabel{font-weight:800;min-width:94px;text-align:center}.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:var(--shadow);margin:12px 0}.card h2{font-size:16px;margin:0 0 12px}.metric-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.metric{background:#fafbff;border:1px solid var(--line);border-radius:16px;padding:13px}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;font-size:24px;margin-top:4px}.metric small{color:var(--muted)}.progress{height:8px;background:#edf0f5;border-radius:999px;overflow:hidden;margin-top:8px}.progress i{display:block;height:100%;background:var(--accent);border-radius:999px}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}label{display:block;font-size:12px;color:var(--muted);font-weight:700}input,select,textarea{width:100%;margin-top:6px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px;font:inherit;color:var(--ink);outline:none}textarea{min-height:84px;resize:vertical}.full{grid-column:1/-1}.primary{width:100%;border:0;background:var(--accent);color:#fff;border-radius:14px;padding:13px 16px;font-weight:800;font-size:15px}.person{border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:10px}.person-top{display:flex;justify-content:space-between;gap:12px}.person-title{font-weight:800}.pill{font-size:11px;border-radius:999px;padding:5px 9px;background:var(--soft);color:var(--accent);font-weight:800}.person p{margin:8px 0 0;font-size:13px;line-height:1.55}.muted{color:var(--muted)}.actions{display:flex;gap:8px;margin-top:10px}.actions button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 10px}.danger{color:var(--danger)}.insight{padding:12px 14px;border-radius:14px;background:#f7f8fc;font-size:13px;line-height:1.6}.chart{display:flex;align-items:flex-end;gap:10px;height:150px;padding:10px 2px 22px;border-bottom:1px solid var(--line);overflow-x:auto}.bar-wrap{min-width:46px;text-align:center;position:relative;height:100%}.bar{position:absolute;left:8px;right:8px;bottom:0;background:var(--accent);border-radius:8px 8px 3px 3px;min-height:2px}.bar-wrap b{position:absolute;bottom:-20px;left:0;right:0;font-size:10px;color:var(--muted)}.bar-wrap em{position:absolute;left:0;right:0;font-style:normal;font-size:10px;color:var(--ink);transform:translateY(-16px)}.tabs{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.95);border-top:1px solid var(--line);backdrop-filter:blur(14px);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom)}.tabs-inner{width:min(760px,100%);display:grid;grid-template-columns:repeat(3,1fr)}.tab{border:0;background:none;padding:14px 4px;color:var(--muted);font-weight:800}.tab.active{color:var(--accent)}.page{display:none}.page.active{display:block}.empty{color:var(--muted);font-size:13px;text-align:center;padding:18px 0}.rate-row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin:11px 0}.rate-row span{font-size:13px}.rate-row strong{font-size:14px}.note{font-size:12px;color:var(--muted);line-height:1.55}.section-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.section-head button{border:0;background:none;color:var(--accent);font-weight:800}.hide{display:none}@media(min-width:620px){.metric-grid{grid-template-columns:repeat(4,1fr)}.form-grid{grid-template-columns:repeat(4,1fr)}}
-</style>
-</head>
-<body>
-<div class="app">
-  <div class="top">
-    <div class="brand"><h1>Match Point</h1><p>結果より、傾向を見る。</p></div>
-    <div class="month-nav"><button id="prevMonth">‹</button><div id="monthLabel"></div><button id="nextMonth">›</button></div>
-  </div>
-
-  <section id="pageMonthly" class="page active">
-    <div class="card">
-      <h2>今月の流れ</h2>
-      <div class="metric-grid">
-        <div class="metric"><span>消費いいね</span><strong id="mUsed">0</strong><small id="mStock">残り 0</small></div>
-        <div class="metric"><span>マッチ</span><strong id="mMatches">0</strong><small id="mMatchRate">0%</small></div>
-        <div class="metric"><span>会話継続</span><strong id="mChats">0</strong><small id="mChatRate">0%</small></div>
-        <div class="metric"><span>会った</span><strong id="mDates">0</strong><small id="mDateRate">0%</small></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="section-head"><h2>月間データ</h2><button id="editToggle">編集</button></div>
-      <div id="monthlyForm" class="form-grid hide">
-        <label>月初いいね数<input id="stockStart" type="number" min="0"></label>
-        <label>追加いいね数<input id="stockAdded" type="number" min="0"></label>
-        <label>消費いいね数<input id="likesUsed" type="number" min="0"></label>
-        <label>マッチ数<input id="matches" type="number" min="0"></label>
-        <label>会話継続数<input id="chats" type="number" min="0"></label>
-        <label>通話数<input id="calls" type="number" min="0"></label>
-        <label>会った人数<input id="dates" type="number" min="0"></label>
-        <label>2回目人数<input id="secondDates" type="number" min="0"></label>
-        <label class="full">月のひとこと<textarea id="monthMemo" placeholder="例：写真変更後はマッチが増えた。会う前に期待しすぎない。"></textarea></label>
-        <div class="full"><button class="primary" id="saveMonthly">保存</button></div>
-      </div>
-      <div id="monthlyRates"></div>
-    </div>
-
-    <div class="card">
-      <h2>今月の見方</h2>
-      <div id="monthlyInsight" class="insight"></div>
-    </div>
-  </section>
-
-  <section id="pagePeople" class="page">
-    <div class="card">
-      <div class="section-head"><h2>会った人の振り返り</h2><button id="newPerson">＋追加</button></div>
-      <p class="note">本名でなく「Aさん」「8月①」などで十分。相手を採点するより、自分が何に惹かれ、実際どう感じたかを残します。</p>
-      <div id="peopleList"></div>
-    </div>
-    <div id="personFormCard" class="card hide">
-      <h2 id="personFormTitle">記録を追加</h2>
-      <div class="form-grid">
-        <label class="full">呼び名<input id="pName" placeholder="Aさん / 8月①"></label>
-        <label class="full">いいねした理由<textarea id="pWhy" placeholder="写真の雰囲気、趣味、価値観など"></textarea></label>
-        <label class="full">会う前に良かった点<textarea id="pBefore" placeholder="メッセージ、通話で感じたこと"></textarea></label>
-        <label class="full">会って良かった点<textarea id="pGood" placeholder="実際に会って魅力に感じたこと"></textarea></label>
-        <label class="full">違った点・気になった点<textarea id="pGap" placeholder="会う前とのギャップなど"></textarea></label>
-        <label>自分はまた会いたい？<select id="pMe"><option value="保留">保留</option><option value="会いたい">会いたい</option><option value="どちらでも">どちらでも</option><option value="会わない">会わない</option></select></label>
-        <label>相手の反応<select id="pThem"><option value="不明">不明</option><option value="前向き">前向き</option><option value="普通">普通</option><option value="弱め">弱め</option></select></label>
-        <label class="full">学び・次に活かすこと<textarea id="pLearn" placeholder="例：通話で合っても対面の相性は別。初回は短めでも良い。"></textarea></label>
-        <div class="full"><button class="primary" id="savePerson">保存</button></div>
-      </div>
-    </div>
-  </section>
-
-  <section id="pageTrend" class="page">
-    <div class="card"><h2>月ごとの会えた人数</h2><div id="dateChart" class="chart"></div></div>
-    <div class="card"><h2>月ごとのマッチ率</h2><div id="matchChart" class="chart"></div></div>
-    <div class="card"><h2>見るポイント</h2><div class="insight">1人の結果ではなく、3〜6か月の傾向で判断。写真・プロフィール・誘うタイミングを変えた月は、月メモに残して比較すると改善点が見えやすくなります。</div></div>
-  </section>
-</div>
-
+:root{--bg:#f6f7fb;--card:#fff;--ink:#172033;--muted:#7c8494;--line:#e7e9ef;--accent:#5c6ac4;--soft:#eef0ff;--danger:#b95361;--shadow:0 10px 30px rgba(30,40,70,.07)}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.app{max-width:760px;margin:auto;padding:20px 16px 92px}.top,.section-head,.person-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.brand h1{font-size:25px;margin:0}.brand p,.note,.muted{color:var(--muted)}.brand p{font-size:13px;margin:4px 0 0}.month-nav{display:flex;align-items:center;gap:6px}.month-nav button{border:1px solid var(--line);background:#fff;border-radius:12px;width:42px;height:42px;font-size:22px}.month-label{min-width:92px;text-align:center;font-weight:800}.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:var(--shadow);margin:12px 0}.card h2{font-size:16px;margin:0 0 12px}.metric-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.metric{background:#fafbff;border:1px solid var(--line);border-radius:16px;padding:13px}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;font-size:24px;margin:4px 0}.metric small{color:var(--muted)}.counter-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.counter-card{border:1px solid var(--line);border-radius:16px;padding:12px;background:#fafbff}.counter-card label{display:block;font-size:12px;color:var(--muted);font-weight:800;margin-bottom:9px}.stepper{display:grid;grid-template-columns:42px 1fr 42px;gap:7px;align-items:center}.stepper button{border:0;border-radius:11px;height:42px;background:var(--soft);color:var(--accent);font-size:23px;font-weight:800;touch-action:manipulation}.stepper input{width:100%;height:42px;text-align:center;border:1px solid var(--line);border-radius:11px;background:#fff;font-size:20px;font-weight:800;color:var(--ink);-moz-appearance:textfield}.stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}.full{grid-column:1/-1}textarea,select,input.text{width:100%;border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px;font:inherit;color:var(--ink)}textarea{min-height:82px;resize:vertical}.primary{width:100%;border:0;background:var(--accent);color:#fff;border-radius:14px;padding:13px;font-weight:800;font-size:15px}.save-note{text-align:center;color:var(--muted);font-size:11px;margin:10px 0 0}.rate-row{display:grid;grid-template-columns:1fr auto;gap:10px;margin:11px 0;font-size:13px}.insight{background:#f7f8fc;border-radius:14px;padding:13px;font-size:13px;line-height:1.6;white-space:pre-wrap}.person{border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:10px}.person-title{font-weight:800}.pill{font-size:11px;border-radius:999px;padding:5px 9px;background:var(--soft);color:var(--accent);font-weight:800}.person p{font-size:13px;line-height:1.55;margin:8px 0 0}.actions{display:flex;gap:8px;margin-top:10px}.actions button,.section-head button{border:0;background:none;color:var(--accent);font-weight:800}.actions .danger{color:var(--danger)}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.form-grid label{font-size:12px;color:var(--muted);font-weight:800}.form-grid label>*{margin-top:6px}.chart{display:flex;align-items:flex-end;gap:10px;height:150px;padding:10px 2px 22px;border-bottom:1px solid var(--line);overflow-x:auto}.bar-wrap{min-width:46px;text-align:center;position:relative;height:100%}.bar{position:absolute;left:8px;right:8px;bottom:0;background:var(--accent);border-radius:8px 8px 3px 3px;min-height:2px}.bar-wrap b{position:absolute;bottom:-20px;left:0;right:0;font-size:10px;color:var(--muted)}.bar-wrap em{position:absolute;left:0;right:0;font-style:normal;font-size:10px;transform:translateY(-16px)}.tabs{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.95);border-top:1px solid var(--line);backdrop-filter:blur(14px);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom)}.tabs-inner{width:min(760px,100%);display:grid;grid-template-columns:repeat(3,1fr)}.tab{border:0;background:none;padding:14px 4px;color:var(--muted);font-weight:800}.tab.active{color:var(--accent)}.page{display:none}.page.active{display:block}.hide{display:none}.empty{text-align:center;color:var(--muted);font-size:13px;padding:18px 0}.note{font-size:12px;line-height:1.55}@media(min-width:620px){.metric-grid{grid-template-columns:repeat(4,1fr)}.counter-grid{grid-template-columns:repeat(4,1fr)}.form-grid{grid-template-columns:repeat(4,1fr)}}
+</style></head><body><div class="app">
+<div class="top"><div class="brand"><h1>Match Point</h1><p>結果より、傾向を見る。</p></div><div class="month-nav"><button id="prevMonth">‹</button><div id="monthLabel" class="month-label"></div><button id="nextMonth">›</button></div></div>
+<section id="pageMonthly" class="page active">
+<div class="card"><h2>今月の流れ</h2><div class="metric-grid"><div class="metric"><span>消費いいね</span><strong id="mUsed">0</strong><small id="mStock">残り 0</small></div><div class="metric"><span>マッチ</span><strong id="mMatches">0</strong><small id="mMatchRate">0%</small></div><div class="metric"><span>会話継続</span><strong id="mChats">0</strong><small id="mChatRate">0%</small></div><div class="metric"><span>会った</span><strong id="mDates">0</strong><small id="mDateRate">0%</small></div></div></div>
+<div class="card"><h2>月間データ</h2><div class="counter-grid" id="counters"></div><p class="save-note">＋ / − は押した瞬間に保存されます。数字部分をタップして直接入力もできます。</p><div style="margin-top:14px"><label style="font-size:12px;color:var(--muted);font-weight:800">月のひとこと</label><textarea id="monthMemo" placeholder="例：写真変更後はマッチが増えた。初回は短めが良さそう。"></textarea><button class="primary" id="saveMemo" style="margin-top:8px">メモを保存</button></div><div id="monthlyRates" style="margin-top:14px"></div></div>
+<div class="card"><h2>今月の見方</h2><div id="monthlyInsight" class="insight"></div></div></section>
+<section id="pagePeople" class="page"><div class="card"><div class="section-head"><h2>会った人の振り返り</h2><button id="newPerson">＋追加</button></div><p class="note">本名ではなく「Aさん」「8月①」などで十分。自分が何に惹かれ、実際どう感じたかを残します。</p><div id="peopleList"></div></div><div id="personFormCard" class="card hide"><h2 id="personFormTitle">記録を追加</h2><div class="form-grid"><label class="full">呼び名<input class="text" id="pName" placeholder="Aさん / 8月①"></label><label class="full">いいねした理由<textarea id="pWhy"></textarea></label><label class="full">会う前に良かった点<textarea id="pBefore"></textarea></label><label class="full">会って良かった点<textarea id="pGood"></textarea></label><label class="full">違った点・気になった点<textarea id="pGap"></textarea></label><label>自分はまた会いたい？<select id="pMe"><option>保留</option><option>会いたい</option><option>どちらでも</option><option>会わない</option></select></label><label>相手の反応<select id="pThem"><option>不明</option><option>前向き</option><option>普通</option><option>弱め</option></select></label><label class="full">学び・次に活かすこと<textarea id="pLearn"></textarea></label><div class="full"><button class="primary" id="savePerson">保存</button></div></div></div></section>
+<section id="pageTrend" class="page"><div class="card"><h2>月ごとの会えた人数</h2><div id="dateChart" class="chart"></div></div><div class="card"><h2>月ごとのマッチ率</h2><div id="matchChart" class="chart"></div></div><div class="card"><h2>見るポイント</h2><div class="insight">1人の結果ではなく、3〜6か月の傾向で判断。写真・プロフィール・誘うタイミングを変えた月はメモに残して比較。</div></div></section></div>
 <nav class="tabs"><div class="tabs-inner"><button class="tab active" data-page="pageMonthly">月間</button><button class="tab" data-page="pagePeople">会った人</button><button class="tab" data-page="pageTrend">推移</button></div></nav>
-
 <script>
-const KEY='matchpoint_v1';
-const state=JSON.parse(localStorage.getItem(KEY)||'{"months":{}}');
-let cursor=new Date(); cursor.setDate(1); let editingPerson=null;
-const $=id=>document.getElementById(id);
-const ym=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-const monthName=d=>`${d.getFullYear()}年${d.getMonth()+1}月`;
-function getMonth(){const k=ym(cursor);if(!state.months[k])state.months[k]={stockStart:0,stockAdded:0,likesUsed:0,matches:0,chats:0,calls:0,dates:0,secondDates:0,memo:'',people:[]};return state.months[k]}
-function save(){localStorage.setItem(KEY,JSON.stringify(state))}
-const pct=(a,b)=>b?`${Math.round(a/b*100)}%`:'0%';
-function render(){
-  $('monthLabel').textContent=monthName(cursor); const m=getMonth();
-  $('mUsed').textContent=m.likesUsed||0; $('mStock').textContent=`残り ${Math.max(0,(+m.stockStart||0)+(+m.stockAdded||0)-(+m.likesUsed||0))}`;
-  $('mMatches').textContent=m.matches||0; $('mMatchRate').textContent=`マッチ率 ${pct(m.matches,m.likesUsed)}`;
-  $('mChats').textContent=m.chats||0; $('mChatRate').textContent=`継続率 ${pct(m.chats,m.matches)}`;
-  $('mDates').textContent=m.dates||0; $('mDateRate').textContent=`会えた率 ${pct(m.dates,m.chats)}`;
-  ['stockStart','stockAdded','likesUsed','matches','chats','calls','dates','secondDates','monthMemo'].forEach(id=>$(id).value=m[id]??'');
-  $('monthlyRates').innerHTML=`<div class="rate-row"><span>いいね → マッチ</span><strong>${pct(m.matches,m.likesUsed)}</strong></div><div class="rate-row"><span>マッチ → 会話継続</span><strong>${pct(m.chats,m.matches)}</strong></div><div class="rate-row"><span>会話継続 → 会う</span><strong>${pct(m.dates,m.chats)}</strong></div><div class="rate-row"><span>初回 → 2回目</span><strong>${pct(m.secondDates,m.dates)}</strong></div>`;
-  let insight='まだデータが少ない月です。まずは結果を評価せず、事実だけ記録していきましょう。';
-  if(m.likesUsed>=20){
-    const r=m.matches/m.likesUsed; const d=m.chats?m.dates/m.chats:0;
-    if(r>=.1 && d>=.35) insight='入口から実際に会うまで、比較的スムーズです。1人の結果より「実際に会って自分がまた会いたいと思えたか」を重視してよさそうです。';
-    else if(r<.08) insight='今月は入口のマッチ率が低め。会話術より先に、写真・プロフィール・いいねする相手の範囲を見直す価値があります。';
-    else if(m.chats>=3 && d<.3) insight='マッチ後の会話は作れていますが、会うところで落ちています。誘うタイミングや、通話を必須にしすぎていないかを見直す候補です。';
-    else insight='大きな問題が一つあるというより、各段階で少しずつ減っています。月単位ではなく3か月ほど並べて見ると判断しやすくなります。';
-  }
-  $('monthlyInsight').textContent=insight+(m.memo?`\n\n今月メモ：${m.memo}`:'');
-  renderPeople(); renderCharts();
-}
-function renderPeople(){const m=getMonth(), root=$('peopleList');if(!m.people.length){root.innerHTML='<div class="empty">まだ記録はありません</div>';return}root.innerHTML=m.people.map((p,i)=>`<div class="person"><div class="person-top"><div><div class="person-title">${esc(p.name||`記録${i+1}`)}</div><div class="muted" style="font-size:12px;margin-top:3px">自分：${esc(p.me)} / 相手：${esc(p.them)}</div></div><span class="pill">${esc(p.me)}</span></div>${p.why?`<p><b>惹かれた理由：</b>${esc(p.why)}</p>`:''}${p.good?`<p><b>会って良かった：</b>${esc(p.good)}</p>`:''}${p.gap?`<p><b>ギャップ：</b>${esc(p.gap)}</p>`:''}${p.learn?`<p><b>学び：</b>${esc(p.learn)}</p>`:''}<div class="actions"><button onclick="editPerson(${i})">編集</button><button class="danger" onclick="deletePerson(${i})">削除</button></div></div>`).join('')}
-function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function renderCharts(){const entries=Object.entries(state.months).sort(([a],[b])=>a.localeCompare(b)).slice(-8);chart('dateChart',entries.map(([k,m])=>({label:k.slice(5),value:+m.dates||0})));chart('matchChart',entries.map(([k,m])=>({label:k.slice(5),value:m.likesUsed?Math.round(m.matches/m.likesUsed*100):0})),true)}
-function chart(id,data,percent=false){const root=$(id);if(!data.length){root.innerHTML='<div class="empty">データがたまると表示されます</div>';return}const max=Math.max(...data.map(x=>x.value),percent?20:1);root.innerHTML=data.map(x=>`<div class="bar-wrap"><div class="bar" style="height:${Math.max(2,x.value/max*100)}%"><em>${x.value}${percent?'%':''}</em></div><b>${x.label}月</b></div>`).join('')}
-$('prevMonth').onclick=()=>{cursor.setMonth(cursor.getMonth()-1);render()}; $('nextMonth').onclick=()=>{cursor.setMonth(cursor.getMonth()+1);render()};
-$('editToggle').onclick=()=>{$('monthlyForm').classList.toggle('hide')};
-$('saveMonthly').onclick=()=>{const m=getMonth();['stockStart','stockAdded','likesUsed','matches','chats','calls','dates','secondDates'].forEach(id=>m[id]=Math.max(0,+$(id).value||0));m.memo=$('monthMemo').value.trim();save();$('monthlyForm').classList.add('hide');render()};
-$('newPerson').onclick=()=>{editingPerson=null;['pName','pWhy','pBefore','pGood','pGap','pLearn'].forEach(id=>$(id).value='');$('pMe').value='保留';$('pThem').value='不明';$('personFormTitle').textContent='記録を追加';$('personFormCard').classList.remove('hide');$('personFormCard').scrollIntoView({behavior:'smooth'})};
-window.editPerson=i=>{const p=getMonth().people[i];editingPerson=i;$('pName').value=p.name||'';$('pWhy').value=p.why||'';$('pBefore').value=p.before||'';$('pGood').value=p.good||'';$('pGap').value=p.gap||'';$('pMe').value=p.me||'保留';$('pThem').value=p.them||'不明';$('pLearn').value=p.learn||'';$('personFormTitle').textContent='記録を編集';$('personFormCard').classList.remove('hide');$('personFormCard').scrollIntoView({behavior:'smooth'})};
-window.deletePerson=i=>{if(confirm('この記録を削除しますか？')){getMonth().people.splice(i,1);save();render()}};
-$('savePerson').onclick=()=>{const p={name:$('pName').value.trim(),why:$('pWhy').value.trim(),before:$('pBefore').value.trim(),good:$('pGood').value.trim(),gap:$('pGap').value.trim(),me:$('pMe').value,them:$('pThem').value,learn:$('pLearn').value.trim()};const arr=getMonth().people;if(editingPerson===null)arr.push(p);else arr[editingPerson]=p;save();$('personFormCard').classList.add('hide');render()};
-document.querySelectorAll('.tab').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));btn.classList.add('active');$(btn.dataset.page).classList.add('active')});
-render();
-</script>
-</body>
-</html>
+const KEY='matchpoint_v1',state=JSON.parse(localStorage.getItem(KEY)||'{"months":{}}');let cursor=new Date();cursor.setDate(1);let editingPerson=null;const $=id=>document.getElementById(id),ym=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,monthName=d=>`${d.getFullYear()}年${d.getMonth()+1}月`,pct=(a,b)=>b?`${Math.round(a/b*100)}%`:'0%';
+function getMonth(){const k=ym(cursor);if(!state.months[k])state.months[k]={stockStart:0,stockAdded:0,likesUsed:0,matches:0,chats:0,calls:0,dates:0,secondDates:0,memo:'',people:[]};if(!state.months[k].people)state.months[k].people=[];return state.months[k]}function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+const counterDefs=[['stockStart','月初いいね数'],['stockAdded','追加いいね数'],['likesUsed','消費いいね数'],['matches','マッチ数'],['chats','会話継続数'],['calls','通話数'],['dates','会った人数'],['secondDates','2回目人数']];
+function buildCounters(){const m=getMonth();$('counters').innerHTML=counterDefs.map(([id,label])=>`<div class="counter-card"><label>${label}</label><div class="stepper"><button data-id="${id}" data-d="-1">−</button><input id="${id}" type="number" min="0" value="${+m[id]||0}" inputmode="numeric"><button data-id="${id}" data-d="1">＋</button></div></div>`).join('');document.querySelectorAll('.stepper button').forEach(b=>b.onclick=()=>adjust(b.dataset.id,+b.dataset.d));counterDefs.forEach(([id])=>$(id).onchange=()=>{getMonth()[id]=Math.max(0,+$(id).value||0);save();render(false)})}
+function adjust(id,d){const m=getMonth();m[id]=Math.max(0,(+m[id]||0)+d);save();render(false)}
+function render(rebuild=true){const m=getMonth();$('monthLabel').textContent=monthName(cursor);$('mUsed').textContent=m.likesUsed||0;$('mStock').textContent=`残り ${Math.max(0,(+m.stockStart||0)+(+m.stockAdded||0)-(+m.likesUsed||0))}`;$('mMatches').textContent=m.matches||0;$('mMatchRate').textContent=`マッチ率 ${pct(m.matches,m.likesUsed)}`;$('mChats').textContent=m.chats||0;$('mChatRate').textContent=`継続率 ${pct(m.chats,m.matches)}`;$('mDates').textContent=m.dates||0;$('mDateRate').textContent=`会えた率 ${pct(m.dates,m.chats)}`;if(rebuild)buildCounters();$('monthMemo').value=m.memo||'';$('monthlyRates').innerHTML=`<div class="rate-row"><span>いいね → マッチ</span><strong>${pct(m.matches,m.likesUsed)}</strong></div><div class="rate-row"><span>マッチ → 会話継続</span><strong>${pct(m.chats,m.matches)}</strong></div><div class="rate-row"><span>会話継続 → 会う</span><strong>${pct(m.dates,m.chats)}</strong></div><div class="rate-row"><span>初回 → 2回目</span><strong>${pct(m.secondDates,m.dates)}</strong></div>`;let insight='まだデータが少ない月です。まずは事実だけ記録していきましょう。';if(m.likesUsed>=20){const r=m.matches/m.likesUsed,d=m.chats?m.dates/m.chats:0;if(r>=.1&&d>=.35)insight='入口から実際に会うまで比較的スムーズです。1人の結果より、自分がまた会いたいと思えたかを重視してよさそうです。';else if(r<.08)insight='今月は入口のマッチ率が低め。写真・プロフィール・いいねする相手の範囲を見直す候補です。';else if(m.chats>=3&&d<.3)insight='マッチ後の会話は作れていますが、会うところで落ちています。誘うタイミングや通話を必須にしすぎていないかを確認。';else insight='各段階で少しずつ減っています。3か月ほど並べて判断するのがおすすめです。'}$('monthlyInsight').textContent=insight+(m.memo?`\n\n今月メモ：${m.memo}`:'');renderPeople();renderCharts()}
+function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function renderPeople(){const a=getMonth().people;$('peopleList').innerHTML=a.length?a.map((p,i)=>`<div class="person"><div class="person-top"><div><div class="person-title">${esc(p.name||`記録${i+1}`)}</div><div class="muted" style="font-size:12px;margin-top:3px">自分：${esc(p.me)} / 相手：${esc(p.them)}</div></div><span class="pill">${esc(p.me)}</span></div>${p.why?`<p><b>惹かれた理由：</b>${esc(p.why)}</p>`:''}${p.good?`<p><b>会って良かった：</b>${esc(p.good)}</p>`:''}${p.gap?`<p><b>ギャップ：</b>${esc(p.gap)}</p>`:''}${p.learn?`<p><b>学び：</b>${esc(p.learn)}</p>`:''}<div class="actions"><button onclick="editPerson(${i})">編集</button><button class="danger" onclick="deletePerson(${i})">削除</button></div></div>`).join(''):'<div class="empty">まだ記録はありません</div>'}
+function renderCharts(){const e=Object.entries(state.months).sort(([a],[b])=>a.localeCompare(b)).slice(-8);chart('dateChart',e.map(([k,m])=>({label:k.slice(5),value:+m.dates||0})));chart('matchChart',e.map(([k,m])=>({label:k.slice(5),value:m.likesUsed?Math.round(m.matches/m.likesUsed*100):0})),true)}function chart(id,data,percent=false){if(!data.length){$(id).innerHTML='<div class="empty">データがたまると表示されます</div>';return}const max=Math.max(...data.map(x=>x.value),percent?20:1);$(id).innerHTML=data.map(x=>`<div class="bar-wrap"><div class="bar" style="height:${Math.max(2,x.value/max*100)}%"><em>${x.value}${percent?'%':''}</em></div><b>${x.label}月</b></div>`).join('')}
+$('prevMonth').onclick=()=>{cursor.setMonth(cursor.getMonth()-1);render()};$('nextMonth').onclick=()=>{cursor.setMonth(cursor.getMonth()+1);render()};$('saveMemo').onclick=()=>{getMonth().memo=$('monthMemo').value.trim();save();render(false)};$('newPerson').onclick=()=>{editingPerson=null;['pName','pWhy','pBefore','pGood','pGap','pLearn'].forEach(id=>$(id).value='');$('pMe').value='保留';$('pThem').value='不明';$('personFormTitle').textContent='記録を追加';$('personFormCard').classList.remove('hide');$('personFormCard').scrollIntoView({behavior:'smooth'})};window.editPerson=i=>{const p=getMonth().people[i];editingPerson=i;$('pName').value=p.name||'';$('pWhy').value=p.why||'';$('pBefore').value=p.before||'';$('pGood').value=p.good||'';$('pGap').value=p.gap||'';$('pMe').value=p.me||'保留';$('pThem').value=p.them||'不明';$('pLearn').value=p.learn||'';$('personFormTitle').textContent='記録を編集';$('personFormCard').classList.remove('hide');$('personFormCard').scrollIntoView({behavior:'smooth'})};window.deletePerson=i=>{if(confirm('この記録を削除しますか？')){getMonth().people.splice(i,1);save();render()}};$('savePerson').onclick=()=>{const p={name:$('pName').value.trim(),why:$('pWhy').value.trim(),before:$('pBefore').value.trim(),good:$('pGood').value.trim(),gap:$('pGap').value.trim(),me:$('pMe').value,them:$('pThem').value,learn:$('pLearn').value.trim()};const a=getMonth().people;editingPerson===null?a.push(p):a[editingPerson]=p;save();$('personFormCard').classList.add('hide');render()};document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));b.classList.add('active');$(b.dataset.page).classList.add('active')});render();
+</script></body></html>
