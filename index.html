@@ -40,20 +40,20 @@
 
     <div class="card">
       <h2>入会時期別：いいね・マッチ</h2>
-      <p class="note">送った相手を「今月入会」と「先月以前入会」に分けて記録します。既存の消費いいね数・マッチ数はそのまま残ります。</p>
-      <div class="cohort-title">今月入会</div>
+      <p class="note">送った相手を「今週入会」と「今週より前入会」に分けて記録します。既存の消費いいね数・マッチ数は消さず、初回だけ「今週入会」に引き継ぎます。</p>
+      <div class="cohort-title">今週入会</div>
       <div class="cohort-grid">
         <div class="cohort-card"><label>送ったいいね</label><div class="stepper"><button data-cohort="currentLikes" data-d="-1">−</button><input id="cohort_currentLikes" type="number" min="0"><button data-cohort="currentLikes" data-d="1">＋</button></div></div>
         <div class="cohort-card"><label>マッチ</label><div class="stepper"><button data-cohort="currentMatches" data-d="-1">−</button><input id="cohort_currentMatches" type="number" min="0"><button data-cohort="currentMatches" data-d="1">＋</button></div></div>
       </div>
-      <div class="cohort-rate rate-row"><span>今月入会のマッチ率</span><strong id="rateCurrent">0%</strong></div>
-      <div class="cohort-title" style="margin-top:16px">先月以前入会</div>
+      <div class="cohort-rate rate-row"><span>今週入会のマッチ率</span><strong id="rateCurrent">0%</strong></div>
+      <div class="cohort-title" style="margin-top:16px">今週より前入会</div>
       <div class="cohort-grid">
         <div class="cohort-card"><label>送ったいいね</label><div class="stepper"><button data-cohort="olderLikes" data-d="-1">−</button><input id="cohort_olderLikes" type="number" min="0"><button data-cohort="olderLikes" data-d="1">＋</button></div></div>
         <div class="cohort-card"><label>マッチ</label><div class="stepper"><button data-cohort="olderMatches" data-d="-1">−</button><input id="cohort_olderMatches" type="number" min="0"><button data-cohort="olderMatches" data-d="1">＋</button></div></div>
       </div>
-      <div class="cohort-rate rate-row"><span>先月以前入会のマッチ率</span><strong id="rateOlder">0%</strong></div>
-      <p class="save-note">この内訳は合計値とは別管理です。過去月のデータは消えません。</p>
+      <div class="cohort-rate rate-row"><span>今週より前入会のマッチ率</span><strong id="rateOlder">0%</strong></div>
+      <p class="save-note">ここを増減すると、上の消費いいね数・マッチ数にも自動で反映されます。</p>
     </div>
 
     <div class="card"><h2>今月の見方</h2><div id="monthlyInsight" class="insight"></div></div>
@@ -114,14 +114,40 @@ function getMonth(){
   if(!state.months[k])state.months[k]={likesUsed:0,matches:0,chats:0,dates:0,secondDates:0,memo:'',people:[],custom:{}};
   const m=state.months[k];
   m.people=m.people||[];m.custom=m.custom||{};
-  m.joinCohort=m.joinCohort||{currentLikes:0,currentMatches:0,olderLikes:0,olderMatches:0};
-  ['currentLikes','currentMatches','olderLikes','olderMatches'].forEach(k=>m.joinCohort[k]=+m.joinCohort[k]||0);
+  if(!m.joinCohort || m.joinCohort.mode!=='weekly-v1'){
+    m.joinCohort={
+      currentLikes:+m.likesUsed||0,
+      currentMatches:+m.matches||0,
+      olderLikes:0,
+      olderMatches:0,
+      mode:'weekly-v1'
+    };
+  }
+  ['currentLikes','currentMatches','olderLikes','olderMatches'].forEach(key=>m.joinCohort[key]=+m.joinCohort[key]||0);
   return m;
 }
 const base=['likesUsed','matches','chats','dates','secondDates'];
 function val(m,id){return base.includes(id)?(+m[id]||0):(+m.custom[id]||0)}
-function setVal(m,id,v){v=Math.max(0,+v||0);base.includes(id)?m[id]=v:m.custom[id]=v}
-function setCohort(m,id,v){m.joinCohort[id]=Math.max(0,+v||0)}
+function setVal(m,id,v){
+  v=Math.max(0,+v||0);
+  if(base.includes(id)){
+    if(id==='likesUsed'){
+      const older=+m.joinCohort.olderLikes||0;
+      if(v>=older)m.joinCohort.currentLikes=v-older;
+      else{m.joinCohort.olderLikes=v;m.joinCohort.currentLikes=0}
+    }else if(id==='matches'){
+      const older=+m.joinCohort.olderMatches||0;
+      if(v>=older)m.joinCohort.currentMatches=v-older;
+      else{m.joinCohort.olderMatches=v;m.joinCohort.currentMatches=0}
+    }
+    m[id]=v;
+  }else m.custom[id]=v;
+}
+function setCohort(m,id,v){
+  m.joinCohort[id]=Math.max(0,+v||0);
+  m.likesUsed=(+m.joinCohort.currentLikes||0)+(+m.joinCohort.olderLikes||0);
+  m.matches=(+m.joinCohort.currentMatches||0)+(+m.joinCohort.olderMatches||0);
+}
 function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
 function buildCounters(){
@@ -154,7 +180,7 @@ function render(){
   const c=m.joinCohort;
   if(c.currentLikes+c.olderLikes>=10){
     const cr=c.currentLikes?c.currentMatches/c.currentLikes:0,or=c.olderLikes?c.olderMatches/c.olderLikes:0;
-    $('monthlyInsight').textContent=cr===or?'入会時期別の差はまだほぼありません。サンプルを増やして見ていきましょう。':cr>or?'今のところ「今月入会」の相手の方がマッチ率が高めです。':'今のところ「先月以前入会」の相手の方がマッチ率が高めです。';
+    $('monthlyInsight').textContent=cr===or?'入会時期別の差はまだほぼありません。サンプルを増やして見ていきましょう。':cr>or?'今のところ「今週入会」の相手の方がマッチ率が高めです。':'今のところ「今週より前入会」の相手の方がマッチ率が高めです。';
   }else{
     $('monthlyInsight').textContent=m.likesUsed>=20?'1人の結果だけでなく、月全体と数か月の傾向で判断していきましょう。':'まだデータが少ない月です。まずは事実だけ記録していきましょう。';
   }
@@ -173,7 +199,7 @@ function renderEdit(){
 function renderTrend(){
   const rows=Object.entries(state.months).sort(([a],[b])=>a.localeCompare(b)).slice(-6).map(([k,m])=>{
     const c=m.joinCohort||{};
-    const extra=(c.currentLikes||c.olderLikes)?` / 今月入会 ${c.currentMatches||0}/${c.currentLikes||0}(${pct(c.currentMatches,c.currentLikes)}) / 先月以前 ${c.olderMatches||0}/${c.olderLikes||0}(${pct(c.olderMatches,c.olderLikes)})`:'';
+    const extra=(c.currentLikes||c.olderLikes)?` / 今週入会 ${c.currentMatches||0}/${c.currentLikes||0}(${pct(c.currentMatches,c.currentLikes)}) / 今週より前 ${c.olderMatches||0}/${c.olderLikes||0}(${pct(c.olderMatches,c.olderLikes)})`:'';
     return `${k}：いいね ${m.likesUsed||0} / マッチ ${m.matches||0} / 会った ${m.dates||0}${extra}`;
   }).join('\n');
   $('trendText').textContent=rows||'データがたまると表示されます';
@@ -183,7 +209,7 @@ function copyText(){
   let t=`${monthName(cursor)} マッチングアプリ活動データ\n\n【カウント】\n`;
   state.items.forEach(it=>t+=`${it.label}：${val(m,it.id)}\n`);
   t+=`\n【割合】\nマッチ率：${pct(m.matches,m.likesUsed)}\nマッチ→会話継続率：${pct(m.chats,m.matches)}\n会話継続→会う率：${pct(m.dates,m.chats)}\n初回→2回目率：${pct(m.secondDates,m.dates)}\n`;
-  t+=`\n【入会時期別】\n今月入会：いいね ${c.currentLikes} / マッチ ${c.currentMatches} / マッチ率 ${pct(c.currentMatches,c.currentLikes)}\n先月以前入会：いいね ${c.olderLikes} / マッチ ${c.olderMatches} / マッチ率 ${pct(c.olderMatches,c.olderLikes)}\n`;
+  t+=`\n【入会時期別】\n今週入会：いいね ${c.currentLikes} / マッチ ${c.currentMatches} / マッチ率 ${pct(c.currentMatches,c.currentLikes)}\n今週より前入会：いいね ${c.olderLikes} / マッチ ${c.olderMatches} / マッチ率 ${pct(c.olderMatches,c.olderLikes)}\n`;
   if(m.memo)t+=`\n【月メモ】\n${m.memo}\n`;
   if(m.people.length){
     t+='\n【会った人】\n';
