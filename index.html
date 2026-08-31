@@ -29,16 +29,6 @@
     </div>
 
     <div class="card">
-      <h2>月間データ</h2>
-      <div class="counter-grid" id="counters"></div>
-      <p class="save-note">＋ / − は押した瞬間に保存。数字を直接入力もできます。</p>
-      <label style="font-size:12px;color:var(--muted);font-weight:800">月のひとこと</label>
-      <textarea id="monthMemo"></textarea>
-      <p class="save-note">入力内容は自動保存されます</p>
-      <div id="monthlyRates"></div>
-    </div>
-
-    <div class="card">
       <h2>入会時期別：いいね・マッチ</h2>
       <p class="note">送った相手を「今週入会」と「今週より前入会」に分けて記録します。既存の消費いいね数・マッチ数は消さず、初回だけ「今週入会」に引き継ぎます。</p>
       <div class="cohort-title">今週入会</div>
@@ -54,6 +44,16 @@
       </div>
       <div class="cohort-rate rate-row"><span>今週より前入会のマッチ率</span><strong id="rateOlder">0%</strong></div>
       <p class="save-note">ここを増減すると、上の消費いいね数・マッチ数にも自動で反映されます。</p>
+    </div>
+
+    <div class="card">
+      <h2>月間データ</h2>
+      <div class="counter-grid" id="counters"></div>
+      <p class="save-note">＋ / − は押した瞬間に保存。数字を直接入力もできます。</p>
+      <label style="font-size:12px;color:var(--muted);font-weight:800">月のひとこと</label>
+      <textarea id="monthMemo"></textarea>
+      <p class="save-note">入力内容は自動保存されます</p>
+      <div id="monthlyRates"></div>
     </div>
 
     <div class="card"><h2>今月の見方</h2><div id="monthlyInsight" class="insight"></div></div>
