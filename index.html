@@ -29,6 +29,24 @@
     </div>
 
     <div class="card">
+      <h2>アプリ別：いいね・マッチ</h2>
+      <p class="note">withとOmiaiを比較します。既存データは最初だけwith側にそのまま入ります。</p>
+      <div class="cohort-title">with</div>
+      <div class="cohort-grid">
+        <div class="cohort-card"><label>送ったいいね</label><div class="stepper"><button data-appstat="withLikes" data-d="-1">−</button><input id="app_withLikes" type="number" min="0"><button data-appstat="withLikes" data-d="1">＋</button></div></div>
+        <div class="cohort-card"><label>マッチ</label><div class="stepper"><button data-appstat="withMatches" data-d="-1">−</button><input id="app_withMatches" type="number" min="0"><button data-appstat="withMatches" data-d="1">＋</button></div></div>
+      </div>
+      <div class="cohort-rate rate-row"><span>with マッチ率</span><strong id="rateWith">0%</strong></div>
+      <div class="cohort-title" style="margin-top:16px">Omiai</div>
+      <div class="cohort-grid">
+        <div class="cohort-card"><label>送ったいいね</label><div class="stepper"><button data-appstat="omiaiLikes" data-d="-1">−</button><input id="app_omiaiLikes" type="number" min="0"><button data-appstat="omiaiLikes" data-d="1">＋</button></div></div>
+        <div class="cohort-card"><label>マッチ</label><div class="stepper"><button data-appstat="omiaiMatches" data-d="-1">−</button><input id="app_omiaiMatches" type="number" min="0"><button data-appstat="omiaiMatches" data-d="1">＋</button></div></div>
+      </div>
+      <div class="cohort-rate rate-row"><span>Omiai マッチ率</span><strong id="rateOmiai">0%</strong></div>
+      <p class="save-note">アプリ別の比較用内訳です。月間合計・入会時期別とは別に保存します。</p>
+    </div>
+
+    <div class="card">
       <h2>入会時期別：いいね・マッチ</h2>
       <p class="note">送った相手を「今週入会」と「今週より前入会」に分けて記録します。既存の消費いいね数・マッチ数は消さず、初回だけ「今週入会」に引き継ぎます。</p>
       <div class="cohort-title">今週入会</div>
@@ -58,7 +76,7 @@
 
     <div class="card"><h2>今月の見方</h2><div id="monthlyInsight" class="insight"></div></div>
     <div class="card"><button class="edit-toggle" id="editModeBtn">編集モード</button><div id="editPanel" class="edit-panel hide"><p class="note">項目の名前変更・追加・削除ができます。</p><div id="editItems"></div><button class="secondary" id="addItem">＋ カウント項目を追加</button></div></div>
-    <div class="card copy-card"><h2>ChatGPTで振り返る</h2><p class="note">この月のカウント・割合・入会時期別の成績・メモ・会った人の記録をまとめてコピーします。</p><button class="primary" id="copyMonth">この月のデータをコピー</button><div id="copyStatus" class="copy-status"></div></div>
+    <div class="card copy-card"><h2>ChatGPTで振り返る</h2><p class="note">この月のカウント・割合・アプリ別・入会時期別の成績・メモ・会った人の記録をまとめてコピーします。</p><button class="primary" id="copyMonth">この月のデータをコピー</button><div id="copyStatus" class="copy-status"></div></div>
   </section>
 
   <section id="pagePeople" class="page">
@@ -115,15 +133,13 @@ function getMonth(){
   const m=state.months[k];
   m.people=m.people||[];m.custom=m.custom||{};
   if(!m.joinCohort || m.joinCohort.mode!=='weekly-v1'){
-    m.joinCohort={
-      currentLikes:+m.likesUsed||0,
-      currentMatches:+m.matches||0,
-      olderLikes:0,
-      olderMatches:0,
-      mode:'weekly-v1'
-    };
+    m.joinCohort={currentLikes:+m.likesUsed||0,currentMatches:+m.matches||0,olderLikes:0,olderMatches:0,mode:'weekly-v1'};
   }
   ['currentLikes','currentMatches','olderLikes','olderMatches'].forEach(key=>m.joinCohort[key]=+m.joinCohort[key]||0);
+  if(!m.appStats || m.appStats.mode!=='two-app-v1'){
+    m.appStats={withLikes:+m.likesUsed||0,withMatches:+m.matches||0,omiaiLikes:0,omiaiMatches:0,mode:'two-app-v1'};
+  }
+  ['withLikes','withMatches','omiaiLikes','omiaiMatches'].forEach(key=>m.appStats[key]=+m.appStats[key]||0);
   return m;
 }
 const base=['likesUsed','matches','chats','dates','secondDates'];
@@ -148,6 +164,7 @@ function setCohort(m,id,v){
   m.likesUsed=(+m.joinCohort.currentLikes||0)+(+m.joinCohort.olderLikes||0);
   m.matches=(+m.joinCohort.currentMatches||0)+(+m.joinCohort.olderMatches||0);
 }
+function setAppStat(m,id,v){m.appStats[id]=Math.max(0,+v||0)}
 function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
 function buildCounters(){
@@ -155,6 +172,16 @@ function buildCounters(){
   $('counters').innerHTML=state.items.map(it=>`<div class="counter-card"><label>${esc(it.label)}</label><div class="stepper"><button data-id="${it.id}" data-d="-1">−</button><input id="cnt_${it.id}" type="number" min="0" value="${val(m,it.id)}"><button data-id="${it.id}" data-d="1">＋</button></div></div>`).join('');
   document.querySelectorAll('.stepper button[data-id]').forEach(b=>b.onclick=()=>{setVal(m,b.dataset.id,val(m,b.dataset.id)+(+b.dataset.d));save();render()});
   state.items.forEach(it=>{const n=$('cnt_'+it.id);if(n)n.onchange=()=>{setVal(m,it.id,n.value);save();render()}});
+}
+
+function bindAppStats(){
+  const m=getMonth(),a=m.appStats;
+  ['withLikes','withMatches','omiaiLikes','omiaiMatches'].forEach(id=>{
+    const n=$('app_'+id);if(n){n.value=a[id]||0;n.onchange=()=>{setAppStat(m,id,n.value);save();render()}}
+  });
+  document.querySelectorAll('[data-appstat]').forEach(b=>b.onclick=()=>{const id=b.dataset.appstat;setAppStat(m,id,(a[id]||0)+(+b.dataset.d));save();render()});
+  $('rateWith').textContent=pct(a.withMatches,a.withLikes);
+  $('rateOmiai').textContent=pct(a.omiaiMatches,a.omiaiLikes);
 }
 
 function bindCohort(){
@@ -174,7 +201,7 @@ function render(){
   $('mMatchRate').textContent=`マッチ率 ${pct(m.matches,m.likesUsed)}`;
   $('mChatRate').textContent=`継続率 ${pct(m.chats,m.matches)}`;
   $('mDateRate').textContent=`会えた率 ${pct(m.dates,m.chats)}`;
-  buildCounters();bindCohort();
+  buildCounters();bindAppStats();bindCohort();
   $('monthMemo').value=m.memo||'';
   $('monthlyRates').innerHTML=`<div class="rate-row"><span>いいね → マッチ</span><strong>${pct(m.matches,m.likesUsed)}</strong></div><div class="rate-row"><span>マッチ → 会話継続</span><strong>${pct(m.chats,m.matches)}</strong></div><div class="rate-row"><span>会話継続 → 会う</span><strong>${pct(m.dates,m.chats)}</strong></div><div class="rate-row"><span>初回 → 2回目</span><strong>${pct(m.secondDates,m.dates)}</strong></div>`;
   const c=m.joinCohort;
@@ -198,24 +225,26 @@ function renderEdit(){
 }
 function renderTrend(){
   const rows=Object.entries(state.months).sort(([a],[b])=>a.localeCompare(b)).slice(-6).map(([k,m])=>{
-    const c=m.joinCohort||{};
-    const extra=(c.currentLikes||c.olderLikes)?` / 今週入会 ${c.currentMatches||0}/${c.currentLikes||0}(${pct(c.currentMatches,c.currentLikes)}) / 今週より前 ${c.olderMatches||0}/${c.olderLikes||0}(${pct(c.olderMatches,c.olderLikes)})`:'';
-    return `${k}：いいね ${m.likesUsed||0} / マッチ ${m.matches||0} / 会った ${m.dates||0}${extra}`;
+    const c=m.joinCohort||{},a=m.appStats||{};
+    const appExtra=(a.withLikes||a.omiaiLikes)?` / with ${a.withMatches||0}/${a.withLikes||0}(${pct(a.withMatches,a.withLikes)}) / Omiai ${a.omiaiMatches||0}/${a.omiaiLikes||0}(${pct(a.omiaiMatches,a.omiaiLikes)})`:'';
+    const cohortExtra=(c.currentLikes||c.olderLikes)?` / 今週入会 ${c.currentMatches||0}/${c.currentLikes||0}(${pct(c.currentMatches,c.currentLikes)}) / 今週より前 ${c.olderMatches||0}/${c.olderLikes||0}(${pct(c.olderMatches,c.olderLikes)})`:'';
+    return `${k}：いいね ${m.likesUsed||0} / マッチ ${m.matches||0} / 会った ${m.dates||0}${appExtra}${cohortExtra}`;
   }).join('\n');
   $('trendText').textContent=rows||'データがたまると表示されます';
 }
 function copyText(){
-  const m=getMonth(),c=m.joinCohort;
+  const m=getMonth(),c=m.joinCohort,a=m.appStats;
   let t=`${monthName(cursor)} マッチングアプリ活動データ\n\n【カウント】\n`;
   state.items.forEach(it=>t+=`${it.label}：${val(m,it.id)}\n`);
   t+=`\n【割合】\nマッチ率：${pct(m.matches,m.likesUsed)}\nマッチ→会話継続率：${pct(m.chats,m.matches)}\n会話継続→会う率：${pct(m.dates,m.chats)}\n初回→2回目率：${pct(m.secondDates,m.dates)}\n`;
+  t+=`\n【アプリ別】\nwith：いいね ${a.withLikes} / マッチ ${a.withMatches} / マッチ率 ${pct(a.withMatches,a.withLikes)}\nOmiai：いいね ${a.omiaiLikes} / マッチ ${a.omiaiMatches} / マッチ率 ${pct(a.omiaiMatches,a.omiaiLikes)}\n`;
   t+=`\n【入会時期別】\n今週入会：いいね ${c.currentLikes} / マッチ ${c.currentMatches} / マッチ率 ${pct(c.currentMatches,c.currentLikes)}\n今週より前入会：いいね ${c.olderLikes} / マッチ ${c.olderMatches} / マッチ率 ${pct(c.olderMatches,c.olderLikes)}\n`;
   if(m.memo)t+=`\n【月メモ】\n${m.memo}\n`;
   if(m.people.length){
     t+='\n【会った人】\n';
     m.people.forEach((p,i)=>{t+=`\n${p.name||`記録${i+1}`}\nいいねした理由：${p.why||'-'}\n会う前に良かった点：${p.before||'-'}\n会って良かった点：${p.good||'-'}\n違った点：${p.gap||'-'}\n自分はまた会いたい：${p.me||'保留'}\n相手の反応：${p.them||'不明'}\n学び：${p.learn||'-'}\n`});
   }
-  t+='\nこのデータから、どこで詰まっているか、良い傾向、改善すると良さそうな点を冷静に分析してください。入会時期別のマッチ率にも差があるか確認してください。';
+  t+='\nこのデータから、どこで詰まっているか、良い傾向、改善すると良さそうな点を冷静に分析してください。withとOmiaiのマッチ率、入会時期別のマッチ率にも差があるか確認してください。';
   return t;
 }
 async function copyMonth(){
