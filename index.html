@@ -30,7 +30,7 @@
 
     <div class="card">
       <h2>アプリ別：いいね・マッチ</h2>
-      <p class="note">withとOmiaiを比較します。既存データは最初だけwith側にそのまま入ります。</p>
+      <p class="note">withとOmiaiを比較します。ここで入力したいいね・マッチの合計が「今月の流れ」に自動反映されます。</p>
       <div class="cohort-title">with</div>
       <div class="cohort-grid">
         <div class="cohort-card"><label>送ったいいね</label><div class="stepper"><button data-appstat="withLikes" data-d="-5">−5</button><input id="app_withLikes" type="number" min="0"><button data-appstat="withLikes" data-d="5">＋5</button></div></div>
@@ -109,6 +109,10 @@ const ym=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
 const monthName=d=>`${d.getFullYear()}年${d.getMonth()+1}月`;
 const pct=(a,b)=>b?`${Math.round(a/b*100)}%`:'0%';
 function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function syncTotalsFromApps(m){
+  m.likesUsed=(+m.appStats.withLikes||0)+(+m.appStats.omiaiLikes||0);
+  m.matches=(+m.appStats.withMatches||0)+(+m.appStats.omiaiMatches||0);
+}
 function getMonth(){
   const k=ym(cursor);
   if(!state.months[k])state.months[k]={likesUsed:0,matches:0,chats:0,dates:0,secondDates:0,memo:'',people:[],custom:{}};
@@ -118,12 +122,30 @@ function getMonth(){
     m.appStats={withLikes:+m.likesUsed||0,withMatches:+m.matches||0,omiaiLikes:0,omiaiMatches:0,mode:'two-app-v1'};
   }
   ['withLikes','withMatches','omiaiLikes','omiaiMatches'].forEach(key=>m.appStats[key]=+m.appStats[key]||0);
+  syncTotalsFromApps(m);
   return m;
 }
 const base=['likesUsed','matches','chats','dates','secondDates'];
 function val(m,id){return base.includes(id)?(+m[id]||0):(+m.custom[id]||0)}
-function setVal(m,id,v){v=Math.max(0,+v||0);base.includes(id)?m[id]=v:m.custom[id]=v}
-function setAppStat(m,id,v){m.appStats[id]=Math.max(0,+v||0)}
+function setVal(m,id,v){
+  v=Math.max(0,+v||0);
+  if(id==='likesUsed'){
+    const omiai=+m.appStats.omiaiLikes||0;
+    if(v>=omiai)m.appStats.withLikes=v-omiai;
+    else{m.appStats.omiaiLikes=v;m.appStats.withLikes=0}
+    m.likesUsed=v;
+  }else if(id==='matches'){
+    const omiai=+m.appStats.omiaiMatches||0;
+    if(v>=omiai)m.appStats.withMatches=v-omiai;
+    else{m.appStats.omiaiMatches=v;m.appStats.withMatches=0}
+    m.matches=v;
+  }else if(base.includes(id))m[id]=v;
+  else m.custom[id]=v;
+}
+function setAppStat(m,id,v){
+  m.appStats[id]=Math.max(0,+v||0);
+  syncTotalsFromApps(m);
+}
 function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
 function buildCounters(){
