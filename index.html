@@ -146,7 +146,9 @@ function setAppStat(m,id,v){
   m.appStats[id]=Math.max(0,+v||0);
   syncTotalsFromApps(m);
 }
-function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}\nfunction autoGrow(el){if(!el)return;el.style.height='auto';el.style.height=Math.max(82,el.scrollHeight)+'px'}\nfunction bindAutoGrow(){document.querySelectorAll('textarea').forEach(el=>{autoGrow(el);if(!el.dataset.autoGrow){el.addEventListener('input',()=>autoGrow(el));el.dataset.autoGrow='1'}})}
+function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function autoGrow(el){if(!el)return;el.style.height='auto';el.style.height=Math.max(82,el.scrollHeight)+'px'}
+function bindAutoGrow(){document.querySelectorAll('textarea').forEach(el=>{autoGrow(el);if(!el.dataset.autoGrow){el.addEventListener('input',()=>autoGrow(el));el.dataset.autoGrow='1'}})}
 
 function buildCounters(){
   const m=getMonth();
