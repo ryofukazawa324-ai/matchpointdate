@@ -32,7 +32,7 @@
       <h2>アプリ別：いいね・マッチ</h2>
       <p class="note">withとOmiaiを比較します。ここで入力したいいね・マッチの合計が「今月の流れ」に自動反映されます。</p>
       <div id="appStatsGroups"></div>
-      <p class="save-note">通常いいね・メッセージ付きいいねは±5、マッチ数は±1。数字の直接入力もできます。</p>
+      <p class="save-note">いいね消費数はアプリごとに合計で記録し、マッチしたときだけ「通常」「メッセージ付き」に分けて記録します。</p>
     </div>
 
     <div class="card">
@@ -100,7 +100,7 @@ const pct=(a,b)=>b?`${Math.round(a/b*100)}%`:'0%';
 function save(){localStorage.setItem(KEY,JSON.stringify(state))}
 function syncTotalsFromApps(m){
   const a=m.appStats;
-  m.likesUsed=(+a.withRegularLikes||0)+(+a.withMessageLikes||0)+(+a.omiaiRegularLikes||0)+(+a.omiaiMessageLikes||0);
+  m.likesUsed=(+a.withLikes||0)+(+a.omiaiLikes||0);
   m.matches=(+a.withRegularMatches||0)+(+a.withMessageMatches||0)+(+a.omiaiRegularMatches||0)+(+a.omiaiMessageMatches||0);
 }
 function getMonth(){
@@ -108,21 +108,19 @@ function getMonth(){
   if(!state.months[k])state.months[k]={likesUsed:0,matches:0,chats:0,dates:0,secondDates:0,memo:'',people:[],custom:{}};
   const m=state.months[k];
   m.people=m.people||[];m.custom=m.custom||{};
-  if(!m.appStats || m.appStats.mode!=='like-type-v1'){
+  if(!m.appStats || m.appStats.mode!=='match-type-v2'){
     const old=m.appStats||{};
     m.appStats={
-      withRegularLikes:+(old.withLikes??old.withRegularLikes)||0,
-      withRegularMatches:+(old.withMatches??old.withRegularMatches)||0,
-      withMessageLikes:+old.withMessageLikes||0,
+      withLikes:+(old.withLikes??((+old.withRegularLikes||0)+(+old.withMessageLikes||0)))||0,
+      withRegularMatches:+(old.withRegularMatches??old.withMatches)||0,
       withMessageMatches:+old.withMessageMatches||0,
-      omiaiRegularLikes:+(old.omiaiLikes??old.omiaiRegularLikes)||0,
-      omiaiRegularMatches:+(old.omiaiMatches??old.omiaiRegularMatches)||0,
-      omiaiMessageLikes:+old.omiaiMessageLikes||0,
+      omiaiLikes:+(old.omiaiLikes??((+old.omiaiRegularLikes||0)+(+old.omiaiMessageLikes||0)))||0,
+      omiaiRegularMatches:+(old.omiaiRegularMatches??old.omiaiMatches)||0,
       omiaiMessageMatches:+old.omiaiMessageMatches||0,
-      mode:'like-type-v1'
+      mode:'match-type-v2'
     };
   }
-  ['withRegularLikes','withRegularMatches','withMessageLikes','withMessageMatches','omiaiRegularLikes','omiaiRegularMatches','omiaiMessageLikes','omiaiMessageMatches'].forEach(key=>m.appStats[key]=+m.appStats[key]||0);
+  ['withLikes','withRegularMatches','withMessageMatches','omiaiLikes','omiaiRegularMatches','omiaiMessageMatches'].forEach(key=>m.appStats[key]=+m.appStats[key]||0);
   syncTotalsFromApps(m);
   return m;
 }
@@ -131,9 +129,7 @@ function val(m,id){return base.includes(id)?(+m[id]||0):(+m.custom[id]||0)}
 function setVal(m,id,v){
   v=Math.max(0,+v||0);
   if(id==='likesUsed'){
-    const app=m.appStats;
-    const other=app.withMessageLikes+app.omiaiRegularLikes+app.omiaiMessageLikes;
-    app.withRegularLikes=Math.max(0,v-other);
+    m.appStats.withLikes=Math.max(0,v-(+m.appStats.omiaiLikes||0));
     m.likesUsed=v;
   }else if(id==='matches'){
     const app=m.appStats;
@@ -165,10 +161,14 @@ function buildCounters(){
 function bindAppStats(){
   const m=getMonth(),a=m.appStats;
   const groups=[
-    {name:'with',label:'with',stats:[['withRegularLikes','通常いいね'],['withRegularMatches','通常いいねからのマッチ'],['withMessageLikes','メッセージ付きいいね'],['withMessageMatches','メッセージ付きいいねからのマッチ']]},
-    {name:'omiai',label:'Omiai',stats:[['omiaiRegularLikes','通常いいね'],['omiaiRegularMatches','通常いいねからのマッチ'],['omiaiMessageLikes','メッセージ付きいいね'],['omiaiMessageMatches','メッセージ付きいいねからのマッチ']]}
+    {label:'with',likes:'withLikes',regular:'withRegularMatches',message:'withMessageMatches'},
+    {label:'Omiai',likes:'omiaiLikes',regular:'omiaiRegularMatches',message:'omiaiMessageMatches'}
   ];
-  $('appStatsGroups').innerHTML=groups.map(g=>`<div class="cohort-title" style="margin-top:14px">${g.label}</div><div class="cohort-grid">${g.stats.map(([id,label])=>`<div class="cohort-card"><label>${label}</label><div class="stepper"><button data-appstat="${id}" data-d="${id.toLowerCase().includes('likes')?'-5':'-1'}">${id.toLowerCase().includes('likes')?'−5':'−'}</button><input id="app_${id}" type="number" min="0" value="${a[id]||0}"><button data-appstat="${id}" data-d="${id.toLowerCase().includes('likes')?'5':'1'}">${id.toLowerCase().includes('likes')?'＋5':'＋'}</button></div></div>`).join('')}</div><div class="cohort-rate rate-row"><span>${g.label} 通常いいねマッチ率</span><strong>${pct(a[g.name+'RegularMatches'],a[g.name+'RegularLikes'])}</strong></div><div class="cohort-rate rate-row"><span>${g.label} メッセージ付きマッチ率</span><strong>${pct(a[g.name+'MessageMatches'],a[g.name+'MessageLikes'])}</strong></div>`).join('');
+  $('appStatsGroups').innerHTML=groups.map(g=>`<div class="cohort-title" style="margin-top:14px">${g.label}</div><div class="cohort-grid">
+    <div class="cohort-card"><label>消費いいね（合計）</label><div class="stepper"><button data-appstat="${g.likes}" data-d="-5">−5</button><input id="app_${g.likes}" type="number" min="0" value="${a[g.likes]||0}"><button data-appstat="${g.likes}" data-d="5">＋5</button></div></div>
+    <div class="cohort-card"><label>通常いいねからのマッチ</label><div class="stepper"><button data-appstat="${g.regular}" data-d="-1">−</button><input id="app_${g.regular}" type="number" min="0" value="${a[g.regular]||0}"><button data-appstat="${g.regular}" data-d="1">＋</button></div></div>
+    <div class="cohort-card"><label>メッセージ付きからのマッチ</label><div class="stepper"><button data-appstat="${g.message}" data-d="-1">−</button><input id="app_${g.message}" type="number" min="0" value="${a[g.message]||0}"><button data-appstat="${g.message}" data-d="1">＋</button></div></div>
+  </div><div class="cohort-rate rate-row"><span>${g.label} 全体マッチ率</span><strong>${pct(a[g.regular]+a[g.message],a[g.likes])}</strong></div>`).join('');
   document.querySelectorAll('[id^="app_"]').forEach(n=>{const id=n.id.slice(4);n.onchange=()=>{setAppStat(m,id,n.value);save();render()}});
   document.querySelectorAll('[data-appstat]').forEach(b=>b.onclick=()=>{const id=b.dataset.appstat;setAppStat(m,id,(a[id]||0)+(+b.dataset.d));save();render()});
 }
@@ -184,11 +184,10 @@ function render(){
   $('monthMemo').value=m.memo||'';
   $('monthlyRates').innerHTML=`<div class="rate-row"><span>いいね → マッチ</span><strong>${pct(m.matches,m.likesUsed)}</strong></div><div class="rate-row"><span>マッチ → 会話継続</span><strong>${pct(m.chats,m.matches)}</strong></div><div class="rate-row"><span>会話継続 → 会う</span><strong>${pct(m.dates,m.chats)}</strong></div><div class="rate-row"><span>初回 → 2回目</span><strong>${pct(m.secondDates,m.dates)}</strong></div>`;
   const a=m.appStats;
-  const totalLikes=a.withRegularLikes+a.withMessageLikes+a.omiaiRegularLikes+a.omiaiMessageLikes;
-  if(totalLikes>=10){
-    const regularLikes=a.withRegularLikes+a.omiaiRegularLikes, regularMatches=a.withRegularMatches+a.omiaiRegularMatches;
-    const messageLikes=a.withMessageLikes+a.omiaiMessageLikes, messageMatches=a.withMessageMatches+a.omiaiMessageMatches;
-    $('monthlyInsight').textContent=regularLikes&&messageLikes?'通常いいねのマッチ率は'+pct(regularMatches,regularLikes)+'、メッセージ付きいいねは'+pct(messageMatches,messageLikes)+'です。送信数の差も見ながら比較しましょう。':'通常いいねとメッセージ付きいいねの両方を記録すると、効果を比較できます。';
+  if(m.likesUsed>=10){
+    const regularMatches=a.withRegularMatches+a.omiaiRegularMatches;
+    const messageMatches=a.withMessageMatches+a.omiaiMessageMatches;
+    $('monthlyInsight').textContent='マッチ内訳：通常いいね '+regularMatches+'件、メッセージ付きいいね '+messageMatches+'件。種類別の送信数は記録していないため、種類別マッチ率は算出しません。';
   }else{
     $('monthlyInsight').textContent=m.likesUsed>=20?'1人の結果だけでなく、月全体と数か月の傾向で判断していきましょう。':'まだデータが少ない月です。まずは事実だけ記録していきましょう。';
   }
@@ -207,17 +206,18 @@ function renderEdit(){
 function renderTrend(){
   const rows=Object.entries(state.months).sort(([a],[b])=>a.localeCompare(b)).slice(-6).map(([k,m])=>{
     const a=m.appStats||{};
-    const appExtra=(a.withRegularLikes||a.withMessageLikes||a.omiaiRegularLikes||a.omiaiMessageLikes)?` / with 通常 ${a.withRegularMatches||0}/${a.withRegularLikes||0}(${pct(a.withRegularMatches,a.withRegularLikes)})・メッセージ付き ${a.withMessageMatches||0}/${a.withMessageLikes||0}(${pct(a.withMessageMatches,a.withMessageLikes)}) / Omiai 通常 ${a.omiaiRegularMatches||0}/${a.omiaiRegularLikes||0}(${pct(a.omiaiRegularMatches,a.omiaiRegularLikes)})・メッセージ付き ${a.omiaiMessageMatches||0}/${a.omiaiMessageLikes||0}(${pct(a.omiaiMessageMatches,a.omiaiMessageLikes)})`:'';
+    const appExtra=(a.withLikes||a.omiaiLikes)?` / with いいね ${a.withLikes||0}・通常マッチ ${a.withRegularMatches||0}・メッセージ付きマッチ ${a.withMessageMatches||0} / Omiai いいね ${a.omiaiLikes||0}・通常マッチ ${a.omiaiRegularMatches||0}・メッセージ付きマッチ ${a.omiaiMessageMatches||0}`:'';
     return `${k}：いいね ${m.likesUsed||0} / マッチ ${m.matches||0} / 会った ${m.dates||0}${appExtra}`;
-  }).join('\n');
+  }).join('\\n');
   $('trendText').textContent=rows||'データがたまると表示されます';
 }
+
 function copyText(){
   const m=getMonth(),a=m.appStats;
   let t=`${monthName(cursor)} マッチングアプリ活動データ\n\n【カウント】\n`;
   state.items.forEach(it=>t+=`${it.label}：${val(m,it.id)}\n`);
   t+=`\n【割合】\nマッチ率：${pct(m.matches,m.likesUsed)}\nマッチ→会話継続率：${pct(m.chats,m.matches)}\n会話継続→会う率：${pct(m.dates,m.chats)}\n初回→2回目率：${pct(m.secondDates,m.dates)}\n`;
-  t+=`\n【アプリ別・いいね種類別】\nwith 通常いいね：${a.withRegularLikes} / マッチ：${a.withRegularMatches} / マッチ率：${pct(a.withRegularMatches,a.withRegularLikes)}\nwith メッセージ付きいいね：${a.withMessageLikes} / マッチ：${a.withMessageMatches} / マッチ率：${pct(a.withMessageMatches,a.withMessageLikes)}\nOmiai 通常いいね：${a.omiaiRegularLikes} / マッチ：${a.omiaiRegularMatches} / マッチ率：${pct(a.omiaiRegularMatches,a.omiaiRegularLikes)}\nOmiai メッセージ付きいいね：${a.omiaiMessageLikes} / マッチ：${a.omiaiMessageMatches} / マッチ率：${pct(a.omiaiMessageMatches,a.omiaiMessageLikes)}\n`;
+  t+=`\n【アプリ別】\nwith：消費いいね ${a.withLikes} / マッチ合計 ${a.withRegularMatches+a.withMessageMatches} / マッチ率 ${pct(a.withRegularMatches+a.withMessageMatches,a.withLikes)}\n　通常いいねからのマッチ：${a.withRegularMatches} / メッセージ付きいいねからのマッチ：${a.withMessageMatches}\nOmiai：消費いいね ${a.omiaiLikes} / マッチ合計 ${a.omiaiRegularMatches+a.omiaiMessageMatches} / マッチ率 ${pct(a.omiaiRegularMatches+a.omiaiMessageMatches,a.omiaiLikes)}\n　通常いいねからのマッチ：${a.omiaiRegularMatches} / メッセージ付きいいねからのマッチ：${a.omiaiMessageMatches}\n`;
   if(m.memo)t+=`\n【月メモ】\n${m.memo}\n`;
   if(m.people.length){
     t+='\n【会った人】\n';
