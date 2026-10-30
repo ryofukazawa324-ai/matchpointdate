@@ -176,13 +176,15 @@ function bindAppStats(){
 function render(){
   const m=getMonth();
   $('monthLabel').textContent=monthName(cursor);
-  $('mUsed').textContent=m.likesUsed||0;$('mMatches').textContent=m.matches||0;$('mChats').textContent=m.chats||0;$('mDates').textContent=m.dates||0;
-  $('mMatchRate').textContent=`マッチ率 ${pct(m.matches,m.likesUsed)}`;
-  $('mChatRate').textContent=`継続率 ${pct(m.chats,m.matches)}`;
+  const totalMatches=(+m.appStats.withRegularMatches||0)+(+m.appStats.withMessageMatches||0)+(+m.appStats.omiaiRegularMatches||0)+(+m.appStats.omiaiMessageMatches||0);
+  m.matches=totalMatches;
+  $('mUsed').textContent=m.likesUsed||0;$('mMatches').textContent=totalMatches;$('mChats').textContent=m.chats||0;$('mDates').textContent=m.dates||0;
+  $('mMatchRate').textContent=`マッチ率 ${pct(totalMatches,m.likesUsed)}`;
+  $('mChatRate').textContent=`継続率 ${pct(m.chats,totalMatches)}`;
   $('mDateRate').textContent=`会えた率 ${pct(m.dates,m.chats)}`;
   buildCounters();bindAppStats();
   $('monthMemo').value=m.memo||'';
-  $('monthlyRates').innerHTML=`<div class="rate-row"><span>いいね → マッチ</span><strong>${pct(m.matches,m.likesUsed)}</strong></div><div class="rate-row"><span>マッチ → 会話継続</span><strong>${pct(m.chats,m.matches)}</strong></div><div class="rate-row"><span>会話継続 → 会う</span><strong>${pct(m.dates,m.chats)}</strong></div><div class="rate-row"><span>初回 → 2回目</span><strong>${pct(m.secondDates,m.dates)}</strong></div>`;
+  $('monthlyRates').innerHTML=`<div class="rate-row"><span>いいね → マッチ</span><strong>${pct(totalMatches,m.likesUsed)}</strong></div><div class="rate-row"><span>マッチ → 会話継続</span><strong>${pct(m.chats,totalMatches)}</strong></div><div class="rate-row"><span>会話継続 → 会う</span><strong>${pct(m.dates,m.chats)}</strong></div><div class="rate-row"><span>初回 → 2回目</span><strong>${pct(m.secondDates,m.dates)}</strong></div>`;
   const a=m.appStats;
   if(m.likesUsed>=10){
     const regularMatches=a.withRegularMatches+a.omiaiRegularMatches;
