@@ -8,7 +8,7 @@
 :root{--bg:#f6f7fb;--card:#fff;--ink:#172033;--muted:#7c8494;--line:#e7e9ef;--accent:#5c6ac4;--soft:#eef0ff;--danger:#b95361}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.app{max-width:760px;margin:auto;padding:20px 16px 100px}.top,.section-head,.person-top{display:flex;justify-content:space-between;align-items:center;gap:10px}.brand h1{margin:0;font-size:25px}.brand p,.note,.muted{color:var(--muted)}.brand p{font-size:13px;margin:4px 0}.month-nav{display:flex;align-items:center;gap:6px}.month-nav button{width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:12px;font-size:22px}.month-label{min-width:92px;text-align:center;font-weight:800}.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;margin:12px 0}.card h2{font-size:16px;margin:0 0 12px}.metric-grid,.counter-grid,.cohort-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.metric,.counter-card,.cohort-card{background:#fafbff;border:1px solid var(--line);border-radius:16px;padding:13px}.metric span,.counter-card label,.cohort-card label{font-size:12px;color:var(--muted);font-weight:800}.metric strong{display:block;font-size:24px;margin:4px 0}.stepper{display:grid;grid-template-columns:42px 1fr 42px;gap:7px;margin-top:9px}.stepper button{border:0;border-radius:11px;background:var(--soft);color:var(--accent);font-size:17px;font-weight:800}.stepper input{width:100%;height:42px;text-align:center;border:1px solid var(--line);border-radius:11px;background:#fff;font-size:20px;font-weight:800}.full{grid-column:1/-1}textarea,select,input.text,.edit-row input{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit}textarea{min-height:82px;overflow:hidden;resize:none;field-sizing:content}.primary,.edit-toggle{width:100%;border:0;background:var(--accent);color:#fff;border-radius:14px;padding:13px;font-weight:800;font-size:15px}.secondary{width:100%;border:1px solid var(--line);background:#fff;color:var(--accent);border-radius:14px;padding:12px;font-weight:800}.save-note{font-size:11px;color:var(--muted);text-align:center}.rate-row{display:grid;grid-template-columns:1fr auto;gap:10px;margin:11px 0;font-size:13px}.insight{background:#f7f8fc;border-radius:14px;padding:13px;font-size:13px;line-height:1.6}.person{border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:10px}.pill{font-size:11px;border-radius:999px;padding:5px 9px;background:var(--soft);color:var(--accent);font-weight:800}.actions{display:flex;gap:8px;margin-top:10px}.actions button,.section-head button{border:0;background:none;color:var(--accent);font-weight:800}.danger{color:var(--danger)!important}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.edit-panel{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}.edit-row{display:grid;grid-template-columns:1fr auto;gap:8px;margin:8px 0}.edit-row button{border:0;background:none;color:var(--danger);font-weight:800}.tabs{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:center}.tabs-inner{width:min(760px,100%);display:grid;grid-template-columns:repeat(3,1fr)}.tab{border:0;background:none;padding:14px;color:var(--muted);font-weight:800}.tab.active{color:var(--accent)}.page{display:none}.page.active{display:block}.hide{display:none}.copy-card{margin-top:18px}.copy-status{font-size:12px;color:var(--muted);text-align:center;margin-top:8px}.cohort-title{font-size:13px;font-weight:900;margin:2px 0 8px}.cohort-rate{margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
 @media(min-width:620px){.metric-grid{grid-template-columns:repeat(4,1fr)}.counter-grid{grid-template-columns:repeat(3,1fr)}.cohort-grid{grid-template-columns:repeat(4,1fr)}}
-</style>
+.match-notes{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}.match-notes h3{font-size:15px;margin:0}.match-note{border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:10px;background:#fff}.match-note-head{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}.match-note input,.match-note textarea,.match-note select{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;margin-top:8px}.match-note textarea{min-height:64px}.match-note .actions{justify-content:flex-end}.match-note .status-select{max-width:132px;margin-top:0}</style>
 </head>
 <body>
 <div class="app">
@@ -32,6 +32,10 @@
       <h2>with：いいね・マッチ</h2>
       <p class="note">withの入力が「今月の流れ」に自動反映されます。</p>
       <div id="appStatsGroups"></div>
+      <div class="match-notes">
+        <div class="section-head"><h3>マッチした人のメモ</h3><button id="addMatchNote">＋メモ追加</button></div>
+        <p class="save-note">相手ごとに名前・会話内容・進捗を記録できます。</p><div id="matchNotesList"></div>
+      </div>
       <p class="save-note">いいね消費数は合計で記録し、マッチしたときだけ「通常」「メッセージ付き」に分けて記録します。</p>
     </div>
 
@@ -172,6 +176,17 @@ function bindAppStats(){
   document.querySelectorAll('[data-appstat]').forEach(b=>b.onclick=()=>{const id=b.dataset.appstat;setAppStat(m,id,(a[id]||0)+(+b.dataset.d));save();render()});
 }
 
+function renderMatchNotes(){
+  const m=getMonth();m.matchNotes=m.matchNotes||[];
+  $('matchNotesList').innerHTML=m.matchNotes.length?m.matchNotes.map((p,i)=>`<div class="match-note">
+    <div class="match-note-head"><input aria-label="相手の名前" placeholder="名前・呼び名" data-match-name="${i}" value="${esc(p.name||'')}"><select class="status-select" aria-label="進捗" data-match-status="${i}"><option ${(p.status||'未着手')==='未着手'?'selected':''}>未着手</option><option ${p.status==='メッセージ中'?'selected':''}>メッセージ中</option><option ${p.status==='会話継続'?'selected':''}>会話継続</option><option ${p.status==='会話終了'?'selected':''}>会話終了</option></select></div>
+    <textarea aria-label="会話メモ" placeholder="会話内容や次に話したいこと..." data-match-memo="${i}">${esc(p.memo||'')}</textarea>
+    <div class="actions"><button class="danger" data-match-delete="${i}">削除</button></div></div>`).join(''):'<p class="note">マッチした相手のメモはまだありません。</p>';
+  document.querySelectorAll('[data-match-name]').forEach(x=>x.oninput=()=>{m.matchNotes[+x.dataset.matchName].name=x.value;save()});
+  document.querySelectorAll('[data-match-status]').forEach(x=>x.onchange=()=>{m.matchNotes[+x.dataset.matchStatus].status=x.value;save()});
+  document.querySelectorAll('[data-match-memo]').forEach(x=>x.oninput=()=>{m.matchNotes[+x.dataset.matchMemo].memo=x.value;save()});
+  document.querySelectorAll('[data-match-delete]').forEach(x=>x.onclick=()=>{m.matchNotes.splice(+x.dataset.matchDelete,1);save();renderMatchNotes()});
+}
 function render(){
   const m=getMonth();
   $('monthLabel').textContent=monthName(cursor);
@@ -182,6 +197,7 @@ function render(){
   $('mChatRate').textContent=`継続率 ${pct(m.chats,totalMatches)}`;
   $('mDateRate').textContent=`会えた率 ${pct(m.dates,m.chats)}`;
   buildCounters();bindAppStats();
+  renderMatchNotes();
   $('monthMemo').value=m.memo||'';
   $('monthlyRates').innerHTML=`<div class="rate-row"><span>いいね → マッチ</span><strong>${pct(totalMatches,m.likesUsed)}</strong></div><div class="rate-row"><span>マッチ → 会話継続</span><strong>${pct(m.chats,totalMatches)}</strong></div><div class="rate-row"><span>会話継続 → 会う</span><strong>${pct(m.dates,m.chats)}</strong></div><div class="rate-row"><span>初回 → 2回目</span><strong>${pct(m.secondDates,m.dates)}</strong></div>`;
   const a=m.appStats;
@@ -219,6 +235,7 @@ function copyText(){
   state.items.forEach(it=>t+=`${it.label}：${val(m,it.id)}\n`);
   t+=`\n【割合】\nマッチ率：${pct(m.matches,m.likesUsed)}\nマッチ→会話継続率：${pct(m.chats,m.matches)}\n会話継続→会う率：${pct(m.dates,m.chats)}\n初回→2回目率：${pct(m.secondDates,m.dates)}\n`;
   t+=`\n【with】\nwith：消費いいね ${a.withLikes} / マッチ合計 ${a.withRegularMatches+a.withMessageMatches} / マッチ率 ${pct(a.withRegularMatches+a.withMessageMatches,a.withLikes)}\n　通常いいねからのマッチ：${a.withRegularMatches} / メッセージ付きいいねからのマッチ：${a.withMessageMatches}\n`;
+  if(m.matchNotes&&m.matchNotes.length){t+='\n【マッチした人のメモ】\n';m.matchNotes.forEach((p,i)=>{t+=`\n${p.name||`相手${i+1}`}（${p.status||'未着手'}）\n${p.memo||'-'}\n`})}
   if(m.memo)t+=`\n【月メモ】\n${m.memo}\n`;
   if(m.people.length){
     t+='\n【会った人】\n';
@@ -232,6 +249,7 @@ async function copyMonth(){
   try{await navigator.clipboard.writeText(t);$('copyStatus').textContent='コピーしました ✓'}catch(e){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();$('copyStatus').textContent='コピーしました ✓'}
 }
 
+$('addMatchNote').onclick=()=>{const m=getMonth();m.matchNotes=m.matchNotes||[];m.matchNotes.unshift({name:'',status:'未着手',memo:''});save();renderMatchNotes();const x=document.querySelector('[data-match-name="0"]');if(x)x.focus()};
 $('copyMonth').onclick=copyMonth;
 $('monthMemo').oninput=()=>{getMonth().memo=$('monthMemo').value;save()};
 $('editModeBtn').onclick=()=>$('editPanel').classList.toggle('hide');
