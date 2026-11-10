@@ -178,8 +178,10 @@ function bindAppStats(){
 
 function renderMatchNotes(){
   const m=getMonth();m.matchNotes=m.matchNotes||[];
+  const admissionOptions=['1日付近','1ヶ月付近','長期'];
+  m.matchNotes.forEach(p=>{if(!admissionOptions.includes(p.status))p.status='1日付近'});
   $('matchNotesList').innerHTML=m.matchNotes.length?m.matchNotes.map((p,i)=>`<div class="match-note">
-    <div class="match-note-head"><input aria-label="相手の名前" placeholder="名前・呼び名" data-match-name="${i}" value="${esc(p.name||'')}"><select class="status-select" aria-label="進捗" data-match-status="${i}"><option ${(p.status||'未着手')==='未着手'?'selected':''}>未着手</option><option ${p.status==='メッセージ中'?'selected':''}>メッセージ中</option><option ${p.status==='会話継続'?'selected':''}>会話継続</option><option ${p.status==='会話終了'?'selected':''}>会話終了</option></select></div>
+    <div class="match-note-head"><input aria-label="相手の名前" placeholder="名前・呼び名" data-match-name="${i}" value="${esc(p.name||'')}"><select class="status-select" aria-label="入会日目安" data-match-status="${i}">${admissionOptions.map(v=>`<option ${p.status===v?'selected':''}>${v}</option>`).join('')}</select></div>
     <textarea aria-label="会話メモ" placeholder="会話内容や次に話したいこと..." data-match-memo="${i}">${esc(p.memo||'')}</textarea>
     <div class="actions"><button class="danger" data-match-delete="${i}">削除</button></div></div>`).join(''):'<p class="note">マッチした相手のメモはまだありません。</p>';
   document.querySelectorAll('[data-match-name]').forEach(x=>x.oninput=()=>{m.matchNotes[+x.dataset.matchName].name=x.value;save()});
