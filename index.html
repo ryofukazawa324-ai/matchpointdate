@@ -140,10 +140,11 @@ function getMonth(){
 const base=['likesUsed','matches','chats','dates','secondDates'];
 function val(m,id){return base.includes(id)?(+m[id]||0):(+m.custom[id]||0)}
 function matchCount(m){const a=m.appStats||{};return (+a.withRegularMatches||0)+(+a.withMessageMatches||0)}
+function matchTimestamp(){const d=new Date();return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}
 function addMatchNotes(m,count){
   if(count<=0)return;
   m.matchNotes=m.matchNotes||[];
-  for(let i=0;i<count;i++)m.matchNotes.unshift({name:'',status:'1日付近',memo:''});
+  for(let i=0;i<count;i++)m.matchNotes.unshift({name:'',status:'1日付近',memo:'',matchedAt:matchTimestamp()});
 }
 function setVal(m,id,v){
   v=Math.max(0,+v||0);
@@ -203,7 +204,7 @@ function renderMatchNotes(){
   const admissionOptions=['1日付近','1ヶ月付近','長期'];
   m.matchNotes.forEach(p=>{if(!admissionOptions.includes(p.status))p.status='1日付近'});
   $('matchNotesList').innerHTML=m.matchNotes.length?m.matchNotes.map((p,i)=>`<div class="match-note">
-    <div class="match-note-head"><input aria-label="相手の名前" placeholder="名前・呼び名" data-match-name="${i}" value="${esc(p.name||'')}"><select class="status-select" aria-label="入会日目安" data-match-status="${i}">${admissionOptions.map(v=>`<option ${p.status===v?'selected':''}>${v}</option>`).join('')}</select></div>
+    <div class="match-note-head"><input aria-label="相手の名前" placeholder="名前・呼び名" data-match-name="${i}" value="${esc(p.name||'')}"><select class="status-select" aria-label="入会日目安" data-match-status="${i}">${admissionOptions.map(v=>`<option ${p.status===v?'selected':''}>${v}</option>`).join('')}</select></div>${p.matchedAt?`<div class="save-note" style="text-align:left;margin-top:7px">マッチ日時：${esc(p.matchedAt)}</div>`:''}
     <textarea aria-label="会話メモ" placeholder="会話内容や次に話したいこと..." data-match-memo="${i}">${esc(p.memo||'')}</textarea>
     <div class="actions"><button class="danger" data-match-delete="${i}">削除</button></div></div>`).join(''):'<p class="note">マッチした相手のメモはまだありません。</p>';
   document.querySelectorAll('[data-match-name]').forEach(x=>x.oninput=()=>{m.matchNotes[+x.dataset.matchName].name=x.value;save()});
@@ -288,7 +289,7 @@ async function copyMonth(){
 
 $('toggleMatchNotes').onclick=()=>{matchNotesExpanded=!matchNotesExpanded;renderMatchNotes()};
 $('messageShortcut').onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$('pageTemplates').classList.add('active');bindAutoGrow()};
-$('addMatchNote').onclick=()=>{matchNotesExpanded=true;const m=getMonth();m.matchNotes=m.matchNotes||[];m.matchNotes.unshift({name:'',status:'1日付近',memo:''});save();renderMatchNotes();const x=document.querySelector('[data-match-name="0"]');if(x)x.focus()};
+$('addMatchNote').onclick=()=>{matchNotesExpanded=true;const m=getMonth();m.matchNotes=m.matchNotes||[];m.matchNotes.unshift({name:'',status:'1日付近',memo:'',matchedAt:matchTimestamp()});save();renderMatchNotes();const x=document.querySelector('[data-match-name="0"]');if(x)x.focus()};
 $('addTemplate').onclick=()=>{state.templates=state.templates||[];state.templates.unshift({title:'',body:''});save();renderTemplates();const x=document.querySelector('[data-template-title="0"]');if(x)x.focus()};
 $('copyMonth').onclick=copyMonth;
 $('monthMemo').oninput=()=>{getMonth().memo=$('monthMemo').value;save()};
