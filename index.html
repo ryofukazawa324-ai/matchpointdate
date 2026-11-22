@@ -130,22 +130,31 @@ function getMonth(){
 }
 const base=['likesUsed','matches','chats','dates','secondDates'];
 function val(m,id){return base.includes(id)?(+m[id]||0):(+m.custom[id]||0)}
+function matchCount(m){const a=m.appStats||{};return (+a.withRegularMatches||0)+(+a.withMessageMatches||0)}
+function addMatchNotes(m,count){
+  if(count<=0)return;
+  m.matchNotes=m.matchNotes||[];
+  for(let i=0;i<count;i++)m.matchNotes.unshift({name:'',status:'1日付近',memo:''});
+}
 function setVal(m,id,v){
   v=Math.max(0,+v||0);
   if(id==='likesUsed'){
     m.appStats.withLikes=v;
     m.likesUsed=v;
   }else if(id==='matches'){
-    const app=m.appStats;
+    const before=matchCount(m),app=m.appStats;
     const other=app.withMessageMatches;
     app.withRegularMatches=Math.max(0,v-other);
-    m.matches=v;
+    m.matches=matchCount(m);
+    addMatchNotes(m,Math.max(0,matchCount(m)-before));
   }else if(base.includes(id))m[id]=v;
   else m.custom[id]=v;
 }
 function setAppStat(m,id,v){
+  const before=matchCount(m);
   m.appStats[id]=Math.max(0,+v||0);
   syncTotalsFromApps(m);
+  addMatchNotes(m,Math.max(0,matchCount(m)-before));
 }
 function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function autoGrow(el){if(!el)return;el.style.height='auto';el.style.height=Math.max(82,el.scrollHeight)+'px'}
